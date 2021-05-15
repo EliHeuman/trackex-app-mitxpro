@@ -78,15 +78,23 @@ const categories = [
   { value: "electronics", label: "Electronics" },
   { value: "groceries", label: "Groceries" },
   { value: "other", label: "Other" },
+  { value: "salary", label: "Salary" },
 ];
 
 const types = [
   { value: "expense", label: "Expense" },
   { value: "income", label: "Income" },
 ];
+
+const AVAILABLE_MODES = {
+  add: "add",
+  edit: "edit",
+};
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [mode, setMode] = useState(AVAILABLE_MODES.add);
+  const [transaction, setTransaction] = useState({});
 
   useEffect(() => {
     setTransactions(data);
@@ -105,10 +113,30 @@ const TransactionsList = () => {
     setTransactions(_transactions);
   };
 
+  const handleEdit = (id) => {
+    setMode(AVAILABLE_MODES.edit);
+    const transaction = transactions.find(
+      (transaction) => transaction.id === id
+    );
+    setTransaction(transaction);
+    setOpenDrawer(true);
+  };
+
   const addTransaction = (data) => {
-    console.log("Data", data);
     setTransactions([...transactions, { ...data }]);
   };
+
+  const editTransaction = (data) => {
+    console.log("Data", data);
+    const _transactionIndex = transactions.findIndex(
+      (transaction) => transaction.id === data.id
+    );
+    const _transactions = [...transactions];
+    _transactions[_transactionIndex] = data;
+
+    setTransactions(_transactions);
+  };
+
   const transactionSchema = Yup.object().shape({
     name: Yup.string().required("Required field"),
     date: Yup.string().required("Required field"),
@@ -117,6 +145,13 @@ const TransactionsList = () => {
     type: Yup.string().required("Required field"),
   });
 
+  const emptyFormInitialValues = {
+    name: "",
+    amount: "",
+    date: "",
+    category: "eating_out",
+    type: "expense",
+  };
   return (
     <Grid>
       <AddButtonWrapper>
@@ -154,10 +189,7 @@ const TransactionsList = () => {
                   <TableCell>
                     <EditIcon
                       style={{ marginRight: "16px" }}
-                      onClick={(e) => {
-                        console.log("I should open edit mode");
-                        console.log(e, transaction.id);
-                      }}
+                      onClick={() => handleEdit(transaction.id)}
                     />
                     <DeleteForeverIcon
                       style={{ color: "#FF7661" }}
@@ -186,17 +218,17 @@ const TransactionsList = () => {
           <Container>
             <h2>New transaction</h2>
             <Formik
-              initialValues={{
-                name: "",
-                amount: "",
-                date: "",
-                category: "eating_out",
-                type: "expense",
-              }}
+              initialValues={
+                mode === AVAILABLE_MODES.add
+                  ? emptyFormInitialValues
+                  : transaction
+              }
               validationSchema={transactionSchema}
               onSubmit={(values, { setSubmitting }) => {
                 console.log(JSON.stringify(values));
-                addTransaction(values);
+                mode === AVAILABLE_MODES.add
+                  ? addTransaction(values)
+                  : editTransaction(values);
                 setSubmitting(false);
                 setOpenDrawer(!openDrawer);
               }}
@@ -217,10 +249,10 @@ const TransactionsList = () => {
                         id='name'
                         name='name'
                         label='Name'
-                        value={values.email}
+                        value={values.name}
                         onChange={handleChange}
-                        error={touched.email && Boolean(errors.email)}
-                        helperText={touched.email && errors.email}
+                        error={touched.name && Boolean(errors.name)}
+                        helperText={touched.name && errors.name}
                       />
                       <TextField
                         fullWidth
