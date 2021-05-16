@@ -180,6 +180,7 @@ const TransactionsList = () => {
           mode={mode}
           availbleModes={AVAILABLE_MODES}
           data={transaction}
+          handleSubmit={handleSubmit}
         />
       )}
     </Grid>
