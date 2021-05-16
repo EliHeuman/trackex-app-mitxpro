@@ -13,9 +13,11 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import Skeleton from "@material-ui/lab/Skeleton";
 
 import data from "./data";
 import { Debug } from "../../../aux/Debug";
+
 const Table = styled.table`
   width: 100%;
   text-align: left;
@@ -97,7 +99,9 @@ const TransactionsList = () => {
   const [transaction, setTransaction] = useState({});
 
   useEffect(() => {
-    setTransactions(data);
+    // setTimeout(() => {
+    //   setTransactions(data);
+    // }, 5000);
   }, []);
 
   const formatter = new Intl.NumberFormat("en-US", {
@@ -174,38 +178,45 @@ const TransactionsList = () => {
           </tr>
         </thead>
         <tbody>
-          {transactions.length ? (
-            transactions.map((transaction) => {
-              return (
-                <tr key={transaction.id}>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.name}</TableCell>
-                  <TableCell>{transaction.category}</TableCell>
-                  <TableCell>
-                    <Amount type={transaction.type}>
-                      {formatter.format(transaction.amount)}
-                    </Amount>
-                  </TableCell>
-                  <TableCell>
-                    <EditIcon
-                      style={{ marginRight: "16px" }}
-                      onClick={() => handleEdit(transaction.id)}
-                    />
-                    <DeleteForeverIcon
-                      style={{ color: "#FF7661" }}
-                      onClick={() => handleDelete(transaction.id)}
-                    />
-                  </TableCell>
+          {transactions.length
+            ? transactions.map((transaction) => {
+                return (
+                  <tr key={transaction.id}>
+                    <TableCell>{transaction.date}</TableCell>
+                    <TableCell>{transaction.name}</TableCell>
+                    <TableCell>{transaction.category}</TableCell>
+                    <TableCell>
+                      <Amount type={transaction.type}>
+                        {formatter.format(transaction.amount)}
+                      </Amount>
+                    </TableCell>
+                    <TableCell>
+                      <EditIcon
+                        style={{ marginRight: "16px" }}
+                        onClick={() => handleEdit(transaction.id)}
+                      />
+                      <DeleteForeverIcon
+                        style={{ color: "#FF7661" }}
+                        onClick={() => handleDelete(transaction.id)}
+                      />
+                    </TableCell>
+                  </tr>
+                );
+              })
+            : Array.from(new Array(6)).map(() => (
+                <tr>
+                  {Array.from(new Array(4)).map((el) => (
+                    <TableCell>
+                      <Skeleton
+                        component='td'
+                        variant='rect'
+                        width='100%'
+                        height={32}
+                      />
+                    </TableCell>
+                  ))}
                 </tr>
-              );
-            })
-          ) : (
-            <tr>
-              <td>
-                <p>Loading...</p>
-              </td>
-            </tr>
-          )}
+              ))}
         </tbody>
       </Table>
 
