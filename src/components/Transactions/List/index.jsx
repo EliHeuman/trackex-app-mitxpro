@@ -10,7 +10,10 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import Paper from "@material-ui/core/Paper";
+import { Input } from "@material-ui/core";
+import FormControl from "@material-ui/core/FormControl";
+import SearchIcon from "@material-ui/icons/Search";
+import InputAdornment from "@material-ui/core/InputAdornment";
 
 import Skeleton from "@material-ui/lab/Skeleton";
 
@@ -45,9 +48,9 @@ const Grid = styled.div`
   padding: 64px;
 `;
 
-const AddButtonWrapper = styled.div`
+const ActionsWrapper = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 `;
 
 const AVAILABLE_MODES = {
@@ -67,10 +70,22 @@ const TransactionsList = () => {
   const [mode, setMode] = useState(AVAILABLE_MODES.add);
   const [transaction, setTransaction] = useState(emptyFormInitialValues);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
 
   useEffect(() => {
     setTransactions(data);
   }, []);
+
+  useEffect(() => {
+    setFilteredTransactions(transactions);
+  }, [transactions]);
+
+  useEffect(() => {
+    console.log("serch---");
+    console.log(search);
+    filterByName(search);
+  }, [search]);
 
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -126,9 +141,35 @@ const TransactionsList = () => {
     setOpenDeleteDialog(false);
   };
 
+  const filterByName = (query) => {
+    console.log("filterByName", query);
+    // console.log("filteredTransactions", filteredTransactions);
+    const _filteredTransactions = transactions.filter((transaction) => {
+      return transaction.name.toLowerCase().includes(query.toLowerCase());
+    });
+    // console.log("_filteredTransactions", _filteredTransactions);
+    setFilteredTransactions(_filteredTransactions);
+  };
+
   return (
     <Grid>
-      <AddButtonWrapper>
+      <ActionsWrapper>
+        <FormControl style={{ width: "80%" }}>
+          <Input
+            name='search'
+            value={search}
+            startAdornment={
+              <InputAdornment position='start'>
+                <SearchIcon />
+              </InputAdornment>
+            }
+            fullWidth
+            onInput={(event) => {
+              console.log("search", event.target.value);
+              setSearch(event.target.value);
+            }}
+          />
+        </FormControl>
         <Button
           variant='contained'
           color='primary'
@@ -136,7 +177,7 @@ const TransactionsList = () => {
         >
           + Add transaction
         </Button>
-      </AddButtonWrapper>
+      </ActionsWrapper>
       <Table>
         <thead>
           <tr>
@@ -149,7 +190,7 @@ const TransactionsList = () => {
         </thead>
         <tbody>
           {transactions.length
-            ? transactions.map((transaction) => {
+            ? filteredTransactions.map((transaction) => {
                 return (
                   <tr key={transaction.id}>
                     <TableCell>{transaction.date}</TableCell>
