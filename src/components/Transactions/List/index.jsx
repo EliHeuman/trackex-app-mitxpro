@@ -15,13 +15,18 @@ import FormControl from "@material-ui/core/FormControl";
 import SearchIcon from "@material-ui/icons/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
 
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Divider from "@material-ui/core/Divider";
+
 import Skeleton from "@material-ui/lab/Skeleton";
 
 import { TransactionDrawer } from "../../Drawer";
 import data from "./data";
+import { getByLabelText } from "@testing-library/dom";
 
 const Table = styled.table`
-  width: 100%;
+  width: 80%;
   text-align: left;
   padding: 16px 0;
 `;
@@ -53,6 +58,33 @@ const ActionsWrapper = styled.div`
   justify-content: space-between;
 `;
 
+const FiltersContainer = styled.div`
+  width: 20%;
+`;
+const FilterWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+const Main = styled.div`
+  width: 100%;
+  display: flex;
+  padding-top: 32px;
+`;
+const availableCategories = [
+  { value: "eating_out", label: "Eating out" },
+  { value: "clothes", label: "Clothes" },
+  { value: "electronics", label: "Electronics" },
+  { value: "groceries", label: "Groceries" },
+  { value: "other", label: "Other" },
+  { value: "salary", label: "Salary" },
+];
+
+const availableTypes = [
+  { value: "expense", label: "Expense" },
+  { value: "income", label: "Income" },
+];
+
 const AVAILABLE_MODES = {
   add: "add",
   edit: "edit",
@@ -73,6 +105,19 @@ const TransactionsList = () => {
   const [search, setSearch] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState([]);
 
+  const [categories, setCategories] = useState(
+    availableCategories.reduce((acc, category) => {
+      acc[category.value] = { label: category.label, checked: false };
+      return acc;
+    }, {})
+  );
+  const [types, setTypes] = useState(
+    availableTypes.reduce((acc, type) => {
+      acc[type.value] = { label: type.label, checked: false };
+      return acc;
+    }, {})
+  );
+
   useEffect(() => {
     setTransactions(data);
   }, []);
@@ -82,10 +127,16 @@ const TransactionsList = () => {
   }, [transactions]);
 
   useEffect(() => {
-    console.log("serch---");
-    console.log(search);
     filterByName(search);
   }, [search]);
+
+  useEffect(() => {
+    filterByCategory(categories);
+  }, [categories]);
+
+  useEffect(() => {
+    filterByType(types);
+  }, [types]);
 
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -151,6 +202,56 @@ const TransactionsList = () => {
     setFilteredTransactions(_filteredTransactions);
   };
 
+  const filterByCategory = () => {
+    console.log("filterByCategory");
+
+    // if no checkbox is selected --> original array
+    // if some checkbox is checked --> filter
+
+    const checked = Object.keys(categories).filter(
+      (cat) => categories[cat].checked
+    );
+
+    if (!checked.length) {
+      //restore original transactions
+      setFilteredTransactions(transactions);
+    } else {
+      const _filteredTransactions = transactions.filter((transaction) => {
+        // console.log("transaction.category", transaction.category);
+        // console.log(
+        //   " transaction.category === categories[transaction.category]",
+        //   transaction.category === categories[transaction.category]
+        // );
+        // console.log(
+        //   "categories[transaction.category]",
+        //   categories[transaction.category]
+        // );
+        return categories[transaction.category].checked;
+      });
+
+      setFilteredTransactions(_filteredTransactions);
+    }
+  };
+
+  const filterByType = () => {
+    console.log("filterByType");
+
+    // if no checkbox is selected --> original array
+    // if some checkbox is checked --> filter
+
+    const checked = Object.keys(types).filter((type) => types[type].checked);
+
+    if (!checked.length) {
+      //restore original transactions
+      setFilteredTransactions(transactions);
+    } else {
+      const _filteredTransactions = transactions.filter((transaction) => {
+        return types[transaction.type].checked;
+      });
+      setFilteredTransactions(_filteredTransactions);
+    }
+  };
+
   return (
     <Grid>
       <ActionsWrapper>
@@ -178,59 +279,130 @@ const TransactionsList = () => {
           + Add transaction
         </Button>
       </ActionsWrapper>
-      <Table>
-        <thead>
-          <tr>
-            <HeadCell>Date</HeadCell>
-            <HeadCell>Name</HeadCell>
-            <HeadCell>Category</HeadCell>
-            <HeadCell>Amount</HeadCell>
-            <HeadCell></HeadCell>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.length
-            ? filteredTransactions.map((transaction) => {
+      <Main>
+        <FiltersContainer>
+          <h2>Filters</h2>
+          <FilterWrapper>
+            <h3>Filter by category</h3>
+            {categories &&
+              Object.keys(categories).map((category) => {
                 return (
-                  <tr key={transaction.id}>
-                    <TableCell>{transaction.date}</TableCell>
-                    <TableCell>{transaction.name}</TableCell>
-                    <TableCell>{transaction.category}</TableCell>
-                    <TableCell>
-                      <Amount type={transaction.type}>
-                        {formatter.format(transaction.amount)}
-                      </Amount>
-                    </TableCell>
-                    <TableCell>
-                      <EditIcon
-                        style={{ marginRight: "16px" }}
-                        onClick={() => handleEdit(transaction.id)}
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={categories[category].checked}
+                        onChange={(event) => {
+                          // I have to update my state for that category.
+                          // should be true if checked
+                          console.log("category", category);
+                          setCategories({
+                            ...categories,
+                            [category]: {
+                              ...categories[category],
+                              checked: event.target.checked,
+                            },
+                          });
+                        }}
+                        value={category}
+                        color='primary'
                       />
-                      <DeleteForeverIcon
-                        style={{ color: "#FF7661" }}
-                        onClick={() => handleDelete(transaction.id)}
-                      />
-                    </TableCell>
-                  </tr>
+                    }
+                    label={categories[category].label}
+                  />
                 );
-              })
-            : Array.from(new Array(6)).map(() => (
-                <tr>
-                  {Array.from(new Array(4)).map((el) => (
-                    <TableCell>
-                      <Skeleton
-                        component='td'
-                        variant='rect'
-                        width='100%'
-                        height={32}
-                      />
-                    </TableCell>
-                  ))}
-                </tr>
-              ))}
-        </tbody>
-      </Table>
+              })}
+          </FilterWrapper>
 
+          <Divider
+            style={{
+              margin: "16px 0",
+            }}
+          />
+
+          <FilterWrapper>
+            <h3>Filter by type</h3>
+            {categories &&
+              Object.keys(types).map((type) => {
+                return (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={types[type].checked}
+                        onChange={(event) => {
+                          // I have to update my state for that type.
+                          // should be true if checked
+                          console.log("type", type);
+                          setTypes({
+                            ...types,
+                            [type]: {
+                              ...types[type],
+                              checked: event.target.checked,
+                            },
+                          });
+                        }}
+                        value={type}
+                        color='primary'
+                      />
+                    }
+                    label={types[type].label}
+                  />
+                );
+              })}
+          </FilterWrapper>
+        </FiltersContainer>
+        <Table>
+          <thead>
+            <tr>
+              <HeadCell>Date</HeadCell>
+              <HeadCell>Name</HeadCell>
+              <HeadCell>Category</HeadCell>
+              <HeadCell>Amount</HeadCell>
+              <HeadCell></HeadCell>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.length
+              ? filteredTransactions.map((transaction) => {
+                  return (
+                    <tr key={transaction.id}>
+                      <TableCell>{transaction.date}</TableCell>
+                      <TableCell>{transaction.name}</TableCell>
+                      <TableCell>{transaction.category}</TableCell>
+                      <TableCell>
+                        <Amount type={transaction.type}>
+                          {formatter.format(transaction.amount)}
+                        </Amount>
+                      </TableCell>
+                      <TableCell>
+                        <EditIcon
+                          style={{ marginRight: "16px" }}
+                          onClick={() => handleEdit(transaction.id)}
+                        />
+                        <DeleteForeverIcon
+                          style={{ color: "#FF7661" }}
+                          onClick={() => handleDelete(transaction.id)}
+                        />
+                      </TableCell>
+                    </tr>
+                  );
+                })
+              : Array.from(new Array(6)).map(() => (
+                  <tr>
+                    {Array.from(new Array(4)).map((el) => (
+                      <TableCell>
+                        <Skeleton
+                          component='td'
+                          variant='rect'
+                          width='100%'
+                          height={32}
+                        />
+                      </TableCell>
+                    ))}
+                  </tr>
+                ))}
+          </tbody>
+        </Table>
+      </Main>
       {openDrawer && (
         <TransactionDrawer
           onClose={() => setOpenDrawer(!openDrawer)}
