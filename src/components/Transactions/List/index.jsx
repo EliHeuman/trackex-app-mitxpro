@@ -5,6 +5,13 @@ import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import EditIcon from "@material-ui/icons/Edit";
 import Button from "@material-ui/core/Button";
 
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Paper from "@material-ui/core/Paper";
+
 import Skeleton from "@material-ui/lab/Skeleton";
 
 import { TransactionDrawer } from "../../Drawer";
@@ -59,6 +66,7 @@ const TransactionsList = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [mode, setMode] = useState(AVAILABLE_MODES.add);
   const [transaction, setTransaction] = useState(emptyFormInitialValues);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     setTransactions(data);
@@ -70,11 +78,11 @@ const TransactionsList = () => {
     minimumFractionDigits: 2,
   });
 
+  const handleCloseDialog = () => setOpenDeleteDialog(false);
+
   const handleDelete = (id) => {
-    const _transactions = [...transactions].filter(
-      (transaction) => transaction.id !== id
-    );
-    setTransactions(_transactions);
+    setTransaction({ id });
+    setOpenDeleteDialog(true);
   };
 
   const handleEdit = (id) => {
@@ -86,7 +94,6 @@ const TransactionsList = () => {
     setOpenDrawer(true);
   };
   const handleSubmit = (values) => {
-    console.log(JSON.stringify(values));
     mode === AVAILABLE_MODES.add
       ? addTransaction(values)
       : editTransaction(values);
@@ -107,6 +114,16 @@ const TransactionsList = () => {
     _transactions[_transactionIndex] = data;
 
     setTransactions(_transactions);
+  };
+
+  const deleteTransaction = () => {
+    console.log("delete", transaction);
+    const _transactions = [...transactions].filter(
+      ({ id }) => id !== transaction.id
+    );
+    console.log(_transactions);
+    setTransactions(_transactions);
+    setOpenDeleteDialog(false);
   };
 
   return (
@@ -182,6 +199,37 @@ const TransactionsList = () => {
           data={transaction}
           handleSubmit={handleSubmit}
         />
+      )}
+      {openDeleteDialog && (
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleCloseDialog}
+          aria-labelledby='delete-transaction'
+        >
+          <DialogTitle>Delete transaction</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this transaction? You won't be
+              able to recover it.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCloseDialog}
+              color='primary'
+              variant='outlined'
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={deleteTransaction}
+              color='primary'
+              variant='contained'
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       )}
     </Grid>
   );
