@@ -23,7 +23,6 @@ import Skeleton from "@material-ui/lab/Skeleton";
 
 import { TransactionDrawer } from "../../Drawer";
 import data from "./data";
-import { getByLabelText } from "@testing-library/dom";
 
 const Table = styled.table`
   width: 80%;
@@ -208,36 +207,37 @@ const TransactionsList = () => {
     // if no checkbox is selected --> original array
     // if some checkbox is checked --> filter
 
+    /*First we filter in our categories state object to get the properties that we want to filter by.
+    Remember that our object looks this way:
+    { 
+      eating_out: {label: "Eating out", checked: true},
+      clothes: {label: "Eating out", checked: false},
+    }
+    By filtering only those where checked: true, we can know if the user selected any checkbox and react to that
+    */
     const checked = Object.keys(categories).filter(
       (cat) => categories[cat].checked
     );
 
+    // We distinguish two cases:
+
     if (!checked.length) {
+      // - If we don't have any checkboxes selected, we set our transactions state object to its original value
+      // This is important because we need a way to go back to the initial state after the user has been filtering
       //restore original transactions
       setFilteredTransactions(transactions);
     } else {
+      // - If we have some checkboxes selected, we filter by that category
       const _filteredTransactions = transactions.filter((transaction) => {
-        // console.log("transaction.category", transaction.category);
-        // console.log(
-        //   " transaction.category === categories[transaction.category]",
-        //   transaction.category === categories[transaction.category]
-        // );
-        // console.log(
-        //   "categories[transaction.category]",
-        //   categories[transaction.category]
-        // );
         return categories[transaction.category].checked;
       });
-
+      // and update our filteredTransactions state object
       setFilteredTransactions(_filteredTransactions);
     }
   };
 
   const filterByType = () => {
     console.log("filterByType");
-
-    // if no checkbox is selected --> original array
-    // if some checkbox is checked --> filter
 
     const checked = Object.keys(types).filter((type) => types[type].checked);
 
@@ -259,6 +259,7 @@ const TransactionsList = () => {
           <Input
             name='search'
             value={search}
+            // check Input docs for more options about how to include adornments
             startAdornment={
               <InputAdornment position='start'>
                 <SearchIcon />
@@ -267,7 +268,10 @@ const TransactionsList = () => {
             fullWidth
             onInput={(event) => {
               console.log("search", event.target.value);
+              // Since setSearch is async, we are not sure how long it will take
+              //therefore we can't be sure about
               setSearch(event.target.value);
+              //filterByName(search);
             }}
           />
         </FormControl>
@@ -285,6 +289,7 @@ const TransactionsList = () => {
           <FilterWrapper>
             <h3>Filter by category</h3>
             {categories &&
+              // since categories is an object, we want to iterate through its keys
               Object.keys(categories).map((category) => {
                 return (
                   <FormControlLabel
@@ -292,16 +297,21 @@ const TransactionsList = () => {
                       <Checkbox
                         checked={categories[category].checked}
                         onChange={(event) => {
-                          // I have to update my state for that category.
-                          // should be true if checked
+                          // We need to keep track of the new state every time a checkbox changes
+
                           console.log("category", category);
-                          setCategories({
-                            ...categories,
+
+                          const newCategoriesState = {
+                            ...categories, // make a copy of all the categories atm
                             [category]: {
-                              ...categories[category],
-                              checked: event.target.checked,
+                              // we want to replace the checked category
+                              ...categories[category], // we keep every property
+                              // label: category.label,
+                              checked: event.target.checked, // we overwrite checked
                             },
-                          });
+                          };
+                          // we update the categories state object
+                          setCategories(newCategoriesState);
                         }}
                         value={category}
                         color='primary'
