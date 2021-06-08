@@ -22,7 +22,7 @@ import Divider from "@material-ui/core/Divider";
 import Skeleton from "@material-ui/lab/Skeleton";
 
 import { TransactionDrawer } from "../../Drawer";
-import data from "./data";
+import { transactionsAPI } from "../../../services/transactions";
 
 const Table = styled.table`
   width: 80%;
@@ -118,7 +118,26 @@ const TransactionsList = () => {
   );
 
   useEffect(() => {
-    setTransactions(data);
+    const getTransactions = async () => {
+      try {
+        const { data, status } = await transactionsAPI.all();
+        console.log("data", data);
+        if (status == 200) {
+          setTransactions(
+            data.map((transaction) => {
+              return {
+                ...transaction,
+                type: transaction.type.value,
+                category: transaction.category.value,
+              };
+            })
+          );
+        }
+      } catch (e) {
+        console.log("error", e);
+      }
+    };
+    getTransactions();
   }, []);
 
   useEffect(() => {
