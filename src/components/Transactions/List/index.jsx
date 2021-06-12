@@ -71,17 +71,16 @@ const Main = styled.div`
   padding-top: 32px;
 `;
 const availableCategories = [
-  { value: "eating_out", label: "Eating out" },
-  { value: "clothes", label: "Clothes" },
-  { value: "electronics", label: "Electronics" },
-  { value: "groceries", label: "Groceries" },
-  { value: "other", label: "Other" },
-  { value: "salary", label: "Salary" },
+  { value: "eating_out", label: "Eating out", id: 1 },
+  { value: "clothes", label: "Clothes", id: 2 },
+  { value: "electronics", label: "Electronics", id: 3 },
+  { value: "groceries", label: "Groceries", id: 4 },
+  { value: "salary", label: "Salary", id: 5 },
 ];
 
 const availableTypes = [
-  { value: "expense", label: "Expense" },
-  { value: "income", label: "Income" },
+  { value: "expense", label: "Expense", id: 1 },
+  { value: "income", label: "Income", id: 2 },
 ];
 
 const AVAILABLE_MODES = {
@@ -89,11 +88,11 @@ const AVAILABLE_MODES = {
   edit: "edit",
 };
 const emptyFormInitialValues = {
-  name: "",
-  amount: "",
-  date: "",
-  category: "eating_out",
-  type: "expense",
+  name: "Natacion",
+  amount: 333,
+  date: "2021-06-08",
+  category: 3,
+  type: 1,
 };
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
@@ -185,8 +184,23 @@ const TransactionsList = () => {
     setOpenDrawer(!openDrawer);
   };
 
-  const addTransaction = (data) => {
-    setTransactions([...transactions, { ...data }]);
+  const addTransaction = async (transaction) => {
+    console.log("tran", transaction);
+    const dbTransaction = {
+      ...transaction,
+      category: availableCategories.find(
+        (cat) => cat.value === transaction.category
+      )?.id,
+      type: availableTypes.find((cat) => cat.value === transaction.type)?.id,
+    };
+    try {
+      const response = await transactionsAPI.create(dbTransaction);
+      console.log("response", response);
+      console.log("transaction", dbTransaction);
+      setTransactions([...transactions, { ...transaction }]);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const editTransaction = (data) => {
