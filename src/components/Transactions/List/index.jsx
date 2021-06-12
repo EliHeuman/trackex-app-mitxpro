@@ -121,7 +121,7 @@ const TransactionsList = () => {
       try {
         const { data, status } = await transactionsAPI.all();
         console.log("data", data);
-        if (status == 200) {
+        if (status === 200) {
           setTransactions(
             data.map((transaction) => {
               return {
@@ -194,10 +194,11 @@ const TransactionsList = () => {
       type: availableTypes.find((cat) => cat.value === transaction.type)?.id,
     };
     try {
-      const response = await transactionsAPI.create(dbTransaction);
-      console.log("response", response);
+      const { status } = await transactionsAPI.create(dbTransaction);
       console.log("transaction", dbTransaction);
-      setTransactions([...transactions, { ...transaction }]);
+      if (status === 200) {
+        setTransactions([...transactions, { ...transaction }]);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -214,14 +215,22 @@ const TransactionsList = () => {
     setTransactions(_transactions);
   };
 
-  const deleteTransaction = () => {
+  const deleteTransaction = async () => {
     console.log("delete", transaction);
-    const _transactions = [...transactions].filter(
-      ({ id }) => id !== transaction.id
-    );
-    console.log(_transactions);
-    setTransactions(_transactions);
-    setOpenDeleteDialog(false);
+    try {
+      const { status } = await transactionsAPI.delete(transaction.id);
+
+      if (status === 200) {
+        const _transactions = [...transactions].filter(
+          ({ id }) => id !== transaction.id
+        );
+        console.log(_transactions);
+        setTransactions(_transactions);
+        setOpenDeleteDialog(false);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const filterByName = (query) => {
