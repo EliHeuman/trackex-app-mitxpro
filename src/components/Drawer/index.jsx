@@ -15,17 +15,16 @@ import { Formik, Form } from "formik";
 import { Debug } from "../../aux/Debug";
 
 const categories = [
-  { value: "eating_out", label: "Eating out" },
-  { value: "clothes", label: "Clothes" },
-  { value: "electronics", label: "Electronics" },
-  { value: "groceries", label: "Groceries" },
-  { value: "other", label: "Other" },
-  { value: "salary", label: "Salary" },
+  { value: "eating_out", label: "Eating out", id: 1 },
+  { value: "clothes", label: "Clothes", id: 2 },
+  { value: "electronics", label: "Electronics", id: 3 },
+  { value: "groceries", label: "Groceries", id: 4 },
+  { value: "salary", label: "Salary", id: 5 },
 ];
 
 const types = [
-  { value: "expense", label: "Expense" },
-  { value: "income", label: "Income" },
+  { value: "expense", label: "Expense", id: 1 },
+  { value: "income", label: "Income", id: 2 },
 ];
 
 const Container = styled.div`
@@ -76,7 +75,12 @@ const TransactionDrawer = ({
           initialValues={data}
           validationSchema={transactionSchema}
           onSubmit={(values, { setSubmitting }) => {
-            handleSubmit(values);
+            handleSubmit({
+              ...values,
+              category: categories.find((cat) => cat.value === values.category)
+                ?.id,
+              type: types.find((cat) => cat.value === values.type)?.id,
+            });
             setSubmitting(false);
           }}
         >

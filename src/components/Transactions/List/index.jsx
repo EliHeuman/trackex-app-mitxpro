@@ -123,13 +123,14 @@ const TransactionsList = () => {
         console.log("data", data);
         if (status === 200) {
           setTransactions(
-            data.map((transaction) => {
-              return {
-                ...transaction,
-                type: transaction.type.value,
-                category: transaction.category.value,
-              };
-            })
+            data
+            // data.map((transaction) => {
+            //   return {
+            //     ...transaction,
+            //     type: transaction.type.value,
+            //     category: transaction.category.value,
+            //   };
+            // })
           );
         }
       } catch (e) {
@@ -173,7 +174,12 @@ const TransactionsList = () => {
     const transaction = transactions.find(
       (transaction) => transaction.id === id
     );
-    setTransaction(transaction);
+    console.log("transaction", transaction);
+    setTransaction({
+      ...transaction,
+      category: transaction.category.value,
+      type: transaction.type.value,
+    });
     setOpenDrawer(true);
   };
   const handleSubmit = (values) => {
@@ -186,33 +192,32 @@ const TransactionsList = () => {
 
   const addTransaction = async (transaction) => {
     console.log("tran", transaction);
-    const dbTransaction = {
-      ...transaction,
-      category: availableCategories.find(
-        (cat) => cat.value === transaction.category
-      )?.id,
-      type: availableTypes.find((cat) => cat.value === transaction.type)?.id,
-    };
     try {
-      const { status } = await transactionsAPI.create(dbTransaction);
-      console.log("transaction", dbTransaction);
+      const { data, status } = await transactionsAPI.create(transaction);
       if (status === 200) {
-        setTransactions([...transactions, { ...transaction }]);
+        setTransactions([...transactions, { ...data }]);
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  const editTransaction = (data) => {
-    console.log("Data", data);
-    const _transactionIndex = transactions.findIndex(
-      (transaction) => transaction.id === data.id
-    );
-    const _transactions = [...transactions];
-    _transactions[_transactionIndex] = data;
+  const editTransaction = async (transaction) => {
+    console.log("Data", transaction);
+    try {
+      const { data, status } = await transactionsAPI.update(transaction);
+      if (status === 200) {
+        const _transactionIndex = transactions.findIndex(
+          (transaction) => transaction.id === data.id
+        );
+        const _transactions = [...transactions];
+        _transactions[_transactionIndex] = data;
 
-    setTransactions(_transactions);
+        setTransactions(_transactions);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const deleteTransaction = async () => {
@@ -311,9 +316,8 @@ const TransactionsList = () => {
             onInput={(event) => {
               console.log("search", event.target.value);
               // Since setSearch is async, we are not sure how long it will take
-              //therefore we can't be sure about
+              // therefore we can't be sure about
               setSearch(event.target.value);
-              //filterByName(search);
             }}
           />
         </FormControl>
@@ -419,9 +423,9 @@ const TransactionsList = () => {
                     <tr key={transaction.id}>
                       <TableCell>{transaction.date}</TableCell>
                       <TableCell>{transaction.name}</TableCell>
-                      <TableCell>{transaction.category}</TableCell>
+                      <TableCell>{transaction.category.label}</TableCell>
                       <TableCell>
-                        <Amount type={transaction.type}>
+                        <Amount type={transaction.type.value}>
                           {formatter.format(transaction.amount)}
                         </Amount>
                       </TableCell>
@@ -440,7 +444,7 @@ const TransactionsList = () => {
                 })
               : Array.from(new Array(6)).map(() => (
                   <tr>
-                    {Array.from(new Array(4)).map((el) => (
+                    {Array.from(new Array(4)).map(() => (
                       <TableCell>
                         <Skeleton
                           component='td'
