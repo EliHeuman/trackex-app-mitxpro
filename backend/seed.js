@@ -5,7 +5,7 @@ const db = low(adapter);
 const lodashId = require("lodash-id");
 
 db._.mixin(lodashId);
-const data = [
+const strapiData = [
   {
     id: 2,
     name: "Coffe",
@@ -699,7 +699,7 @@ const data = [
 ];
 // Initialize transactions
 db.defaults({ transactions: [] }).write();
-data.forEach((transaction) =>
+strapiData.forEach((transaction) =>
   db
     .get("transactions")
     .insert({
