@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const low = require("lowdb");
+const cors = require("cors");
 const lodashId = require("lodash-id");
 
 const FileSync = require("lowdb/adapters/FileSync");
@@ -12,6 +13,10 @@ db._.mixin(lodashId);
 // Set some defaults
 db.defaults({ transactions: [] }).write();
 
+const corsOptions = {
+  origin: "http://localhost:5001",
+};
+app.use(cors(corsOptions));
 app.use(express.json()); // for parsing application/json
 app.get("/transactions", (req, res) => {
   // make sure our server is answering
@@ -33,14 +38,13 @@ app.post("/transactions", (req, res) => {
     updated_at: new Date(),
   };
 
-  db.get("transactions").insert(newTransaction).write();
-
-  res.status(201).json(db.get("transactions").value());
+  const created = db.get("transactions").insert(newTransaction).write();
+  // console.log("create", created);
+  res.status(201).json(created);
 });
 
 app.put("/transactions/:id", (req, res) => {
   // console.log("req.body", req.body);
-  const { name, date, amount, category, type } = req.body;
   const { id } = req.params;
   const updatedTransaction = db
     .get("transactions")
@@ -50,7 +54,7 @@ app.put("/transactions/:id", (req, res) => {
     })
     .value();
   if (updatedTransaction) {
-    res.status(200).json(db.get("transactions").value());
+    res.status(200).json(updatedTransaction);
   } else {
     res.status(404).json({ message: "Resource not found" });
   }

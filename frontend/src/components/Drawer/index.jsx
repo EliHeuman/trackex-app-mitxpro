@@ -14,18 +14,7 @@ import * as Yup from "yup";
 import { Formik, Form } from "formik";
 import { Debug } from "../../aux/Debug";
 
-const categories = [
-  { value: "eating_out", label: "Eating out", id: 1 },
-  { value: "clothes", label: "Clothes", id: 2 },
-  { value: "electronics", label: "Electronics", id: 3 },
-  { value: "groceries", label: "Groceries", id: 4 },
-  { value: "salary", label: "Salary", id: 5 },
-];
-
-const types = [
-  { value: "expense", label: "Expense", id: 1 },
-  { value: "income", label: "Income", id: 2 },
-];
+import { TrackexContext } from "../../trackexContext";
 
 const Container = styled.div`
   padding: 16px;
@@ -66,6 +55,7 @@ const TransactionDrawer = ({
     category: Yup.string().required("Required field"),
     type: Yup.string().required("Required field"),
   });
+  const { categories, types } = React.useContext(TrackexContext);
 
   return (
     <Drawer anchor='right' open={open} onClose={onClose}>
@@ -77,9 +67,8 @@ const TransactionDrawer = ({
           onSubmit={(values, { setSubmitting }) => {
             handleSubmit({
               ...values,
-              category: categories.find((cat) => cat.value === values.category)
-                ?.id,
-              type: types.find((cat) => cat.value === values.type)?.id,
+              category: categories.find((cat) => cat.value === values.category),
+              type: types.find((type) => type.value === values.type),
             });
             setSubmitting(false);
           }}

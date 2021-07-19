@@ -24,6 +24,7 @@ import Skeleton from "@material-ui/lab/Skeleton";
 import { TransactionDrawer } from "../../Drawer";
 import { transactionsAPI } from "../../../services/transactions";
 
+import { TrackexContext } from "../../../trackexContext";
 const Table = styled.table`
   width: 80%;
   text-align: left;
@@ -88,11 +89,11 @@ const AVAILABLE_MODES = {
   edit: "edit",
 };
 const emptyFormInitialValues = {
-  name: "Natacion",
-  amount: 333,
+  name: "t-shirt",
+  amount: 33,
   date: "2021-06-08",
-  category: 3,
-  type: 1,
+  category: "clothes",
+  type: "expense",
 };
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
@@ -103,18 +104,34 @@ const TransactionsList = () => {
   const [search, setSearch] = useState("");
   const [filteredTransactions, setFilteredTransactions] = useState([]);
 
-  const [categories, setCategories] = useState(
-    availableCategories.reduce((acc, category) => {
-      acc[category.value] = { label: category.label, checked: false };
-      return acc;
-    }, {})
-  );
-  const [types, setTypes] = useState(
-    availableTypes.reduce((acc, type) => {
-      acc[type.value] = { label: type.label, checked: false };
-      return acc;
-    }, {})
-  );
+  const ctx = React.useContext(TrackexContext);
+
+  const [categories, setCategories] = useState({});
+  const [types, setTypes] = useState({});
+
+  // console.log("types LIST", types);
+  // console.log("categories LIST", categories);
+
+  useEffect(() => {
+    setCategories(
+      ctx.categories.reduce((acc, category) => {
+        acc[category.value] = {
+          label: category.label,
+          checked: false,
+        };
+        return acc;
+      }, {})
+    );
+    setTypes(
+      ctx.types.reduce((acc, type) => {
+        acc[type.value] = {
+          label: type.label,
+          checked: false,
+        };
+        return acc;
+      }, {})
+    );
+  }, [ctx]);
 
   useEffect(() => {
     const getTransactions = async () => {
@@ -122,26 +139,17 @@ const TransactionsList = () => {
         const { data, status } = await transactionsAPI.all();
         console.log("data", data);
         if (status === 200) {
-          setTransactions(
-            data
-            // data.map((transaction) => {
-            //   return {
-            //     ...transaction,
-            //     type: transaction.type.value,
-            //     category: transaction.category.value,
-            //   };
-            // })
-          );
+          setTransactions(data);
         }
       } catch (e) {
         console.log("error", e);
       }
     };
     getTransactions();
-  }, []);
+  }, [ctx]);
 
   useEffect(() => {
-    setFilteredTransactions(transactions);
+    transactions && setFilteredTransactions(transactions);
   }, [transactions]);
 
   useEffect(() => {
@@ -174,7 +182,6 @@ const TransactionsList = () => {
     const transaction = transactions.find(
       (transaction) => transaction.id === id
     );
-    console.log("transaction", transaction);
     setTransaction({
       ...transaction,
       category: transaction.category.value,
@@ -183,6 +190,7 @@ const TransactionsList = () => {
     setOpenDrawer(true);
   };
   const handleSubmit = (values) => {
+    console.log("values", values);
     mode === AVAILABLE_MODES.add
       ? addTransaction(values)
       : editTransaction(values);
@@ -191,10 +199,10 @@ const TransactionsList = () => {
   };
 
   const addTransaction = async (transaction) => {
-    console.log("tran", transaction);
     try {
       const { data, status } = await transactionsAPI.create(transaction);
-      if (status === 200) {
+      console.log("addTransaction data", data);
+      if (status === 201) {
         setTransactions([...transactions, { ...data }]);
       }
     } catch (err) {
@@ -203,7 +211,6 @@ const TransactionsList = () => {
   };
 
   const editTransaction = async (transaction) => {
-    console.log("Data", transaction);
     try {
       const { data, status } = await transactionsAPI.update(transaction);
       if (status === 200) {
@@ -239,7 +246,6 @@ const TransactionsList = () => {
   };
 
   const filterByName = (query) => {
-    console.log("filterByName", query);
     // console.log("filteredTransactions", filteredTransactions);
     const _filteredTransactions = transactions.filter((transaction) => {
       return transaction.name.toLowerCase().includes(query.toLowerCase());
@@ -249,8 +255,6 @@ const TransactionsList = () => {
   };
 
   const filterByCategory = () => {
-    console.log("filterByCategory");
-
     // if no checkbox is selected --> original array
     // if some checkbox is checked --> filter
 
@@ -276,7 +280,7 @@ const TransactionsList = () => {
     } else {
       // - If we have some checkboxes selected, we filter by that category
       const _filteredTransactions = transactions.filter((transaction) => {
-        return categories[transaction.category].checked;
+        return categories[transaction.category.value].checked;
       });
       // and update our filteredTransactions state object
       setFilteredTransactions(_filteredTransactions);
@@ -284,8 +288,6 @@ const TransactionsList = () => {
   };
 
   const filterByType = () => {
-    console.log("filterByType");
-
     const checked = Object.keys(types).filter((type) => types[type].checked);
 
     if (!checked.length) {
@@ -293,7 +295,7 @@ const TransactionsList = () => {
       setFilteredTransactions(transactions);
     } else {
       const _filteredTransactions = transactions.filter((transaction) => {
-        return types[transaction.type].checked;
+        return types[transaction.type.value].checked;
       });
       setFilteredTransactions(_filteredTransactions);
     }
@@ -352,7 +354,6 @@ const TransactionsList = () => {
                             [category]: {
                               // we want to replace the checked category
                               ...categories[category], // we keep every property
-                              // label: category.label,
                               checked: event.target.checked, // we overwrite checked
                             },
                           };
@@ -419,13 +420,16 @@ const TransactionsList = () => {
           <tbody>
             {transactions.length
               ? filteredTransactions.map((transaction) => {
+                  console.log("------------", transaction);
+                  console.log("cat", transaction.category);
+                  console.log("type", transaction.type);
                   return (
                     <tr key={transaction.id}>
                       <TableCell>{transaction.date}</TableCell>
                       <TableCell>{transaction.name}</TableCell>
-                      <TableCell>{transaction.category.label}</TableCell>
+                      <TableCell>{transaction.category?.label}</TableCell>
                       <TableCell>
-                        <Amount type={transaction.type.value}>
+                        <Amount type={transaction.type?.value}>
                           {formatter.format(transaction.amount)}
                         </Amount>
                       </TableCell>

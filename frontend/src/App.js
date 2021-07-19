@@ -4,9 +4,10 @@ import "./App.css";
 
 import { NavBar } from "./components/NavBar";
 import { TransactionsList } from "./components/Transactions/List";
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
+import { MuiThemeProvider, createTheme } from "@material-ui/core/styles";
+import { TrackexProvider } from "./trackexContext";
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: {
       main: "#FF7661",
@@ -63,12 +64,14 @@ const theme = createMuiTheme({
 
 function App() {
   return (
-    <MuiThemeProvider theme={theme}>
-      <div className='layout'>
-        <NavBar />
-        <TransactionsList />
-      </div>
-    </MuiThemeProvider>
+    <TrackexProvider>
+      <MuiThemeProvider theme={theme}>
+        <div className='layout'>
+          <NavBar />
+          <TransactionsList />
+        </div>
+      </MuiThemeProvider>
+    </TrackexProvider>
   );
 }
 

@@ -5,6 +5,7 @@ const db = low(adapter);
 const lodashId = require("lodash-id");
 
 db._.mixin(lodashId);
+
 const strapiData = [
   {
     id: 2,
@@ -697,22 +698,30 @@ const strapiData = [
     updated_at: "2021-07-08T14:38:12.535Z",
   },
 ];
+
 // Initialize transactions
 db.defaults({ transactions: [] }).write();
-strapiData.forEach((transaction) =>
-  db
-    .get("transactions")
-    .insert({
-      name: transaction.name,
-      date: transaction.date,
-      amount: transaction.amount,
-      category: {
-        value: transaction.category.value,
-        label: transaction.category.label,
-      },
-      type: { value: transaction.type.value, label: transaction.type.label },
-      created_at: new Date(),
-      updated_at: new Date(),
-    })
-    .write()
-);
+
+strapiData.forEach((transaction) => {
+  if (transaction.category.value && transaction.type.value) {
+    db.get("transactions")
+      .insert({
+        name: transaction.name,
+        date: transaction.date,
+        amount: transaction.amount,
+        category: {
+          id: transaction.category.id,
+          value: transaction.category.value,
+          label: transaction.category.label,
+        },
+        type: {
+          id: transaction.type.id,
+          value: transaction.type.value,
+          label: transaction.type.label,
+        },
+        created_at: new Date(),
+        updated_at: new Date(),
+      })
+      .write();
+  }
+});
