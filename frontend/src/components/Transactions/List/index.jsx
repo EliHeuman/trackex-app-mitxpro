@@ -25,6 +25,7 @@ import { TransactionDrawer } from "../../Drawer";
 import { transactionsAPI } from "../../../services/transactions";
 
 import { TrackexContext } from "../../../trackexContext";
+
 const Table = styled.table`
   width: 80%;
   text-align: left;
@@ -137,7 +138,6 @@ const TransactionsList = () => {
     const getTransactions = async () => {
       try {
         const { data, status } = await transactionsAPI.all();
-        console.log("data", data);
         if (status === 200) {
           setTransactions(data);
         }
@@ -201,7 +201,7 @@ const TransactionsList = () => {
   const addTransaction = async (transaction) => {
     try {
       const { data, status } = await transactionsAPI.create(transaction);
-      console.log("addTransaction data", data);
+
       if (status === 201) {
         setTransactions([...transactions, { ...data }]);
       }
@@ -347,8 +347,6 @@ const TransactionsList = () => {
                         onChange={(event) => {
                           // We need to keep track of the new state every time a checkbox changes
 
-                          console.log("category", category);
-
                           const newCategoriesState = {
                             ...categories, // make a copy of all the categories atm
                             [category]: {
@@ -388,7 +386,7 @@ const TransactionsList = () => {
                         onChange={(event) => {
                           // I have to update my state for that type.
                           // should be true if checked
-                          console.log("type", type);
+
                           setTypes({
                             ...types,
                             [type]: {
@@ -420,9 +418,6 @@ const TransactionsList = () => {
           <tbody>
             {transactions.length
               ? filteredTransactions.map((transaction) => {
-                  console.log("------------", transaction);
-                  console.log("cat", transaction.category);
-                  console.log("type", transaction.type);
                   return (
                     <tr key={transaction.id}>
                       <TableCell>{transaction.date}</TableCell>

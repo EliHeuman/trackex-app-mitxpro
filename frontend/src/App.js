@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 
 import "./App.css";
 
 import { NavBar } from "./components/NavBar";
 import { TransactionsList } from "./components/Transactions/List";
+import { Login } from "./components/Auth/Login";
 import { MuiThemeProvider, createTheme } from "@material-ui/core/styles";
 import { TrackexProvider } from "./trackexContext";
 
@@ -63,13 +64,19 @@ const theme = createTheme({
 });
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(undefined);
+
   return (
     <TrackexProvider>
       <MuiThemeProvider theme={theme}>
-        <div className='layout'>
-          <NavBar />
-          <TransactionsList />
-        </div>
+        {currentUser ? (
+          <div className='layout'>
+            <NavBar />
+            <TransactionsList />
+          </div>
+        ) : (
+          <Login setCurrentUser={setCurrentUser} />
+        )}
       </MuiThemeProvider>
     </TrackexProvider>
   );
