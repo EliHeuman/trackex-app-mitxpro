@@ -1,60 +1,6 @@
 {
   "transactions": [
     {
-      "name": "Coffe",
-      "date": "2021-06-04",
-      "amount": 4.5,
-      "category": {
-        "id": 1,
-        "value": "eating_out",
-        "label": "Eating out"
-      },
-      "type": {
-        "id": 1,
-        "value": "expense",
-        "label": "Expense"
-      },
-      "created_at": "2021-07-19T13:43:26.315Z",
-      "updated_at": "2021-07-19T13:43:26.315Z",
-      "id": "6f10b786-3952-4aad-b7a3-144f5062d35e"
-    },
-    {
-      "name": "t-shirts",
-      "date": "2021-06-02",
-      "amount": 900,
-      "category": {
-        "id": 3,
-        "value": "electronics",
-        "label": "Electronics"
-      },
-      "type": {
-        "id": 1,
-        "value": "expense",
-        "label": "Expense"
-      },
-      "created_at": "2021-07-19T13:43:26.317Z",
-      "updated_at": "2021-07-19T13:43:26.317Z",
-      "id": "071bf53e-c5fe-43bb-b797-477e78566083"
-    },
-    {
-      "name": "t-shirts",
-      "date": "2021-06-02",
-      "amount": 9,
-      "category": {
-        "id": 3,
-        "value": "electronics",
-        "label": "Electronics"
-      },
-      "type": {
-        "id": 1,
-        "value": "expense",
-        "label": "Expense"
-      },
-      "created_at": "2021-07-19T13:43:26.317Z",
-      "updated_at": "2021-07-19T13:43:26.317Z",
-      "id": "f6ae478c-32e7-4b6e-9c06-ba52f2bed667"
-    },
-    {
       "name": "t-shirts",
       "date": "2021-05-02",
       "amount": 9,

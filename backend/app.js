@@ -3,6 +3,7 @@ const app = express();
 const low = require("lowdb");
 const cors = require("cors");
 const lodashId = require("lodash-id");
+const jwt = require("jsonwebtoken");
 
 const FileSync = require("lowdb/adapters/FileSync");
 
@@ -18,6 +19,30 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json()); // for parsing application/json
+
+const authenticateJWT = (req, res, next) => {
+  console.log(`Headers: ${JSON.stringify(req.headers)}`);
+  console.log(`Body: ${JSON.stringify(req.body)}`);
+
+  const { authorization } = req.headers;
+
+  if (authorization) {
+    const token = authorization.split(" ")[1];
+
+    jwt.verify(token, accessTokenSecret, (err, user) => {
+      if (err) {
+        return res.sendStatus(403);
+      }
+      console.log("user", user);
+      req.user = user;
+      next();
+    });
+  } else {
+    res.sendStatus(401);
+  }
+};
+app.use(authenticateJWT);
+
 app.get("/transactions", (req, res) => {
   // make sure our server is answering
   // res.send("<h1>Hello from the Server</h1>");
@@ -69,6 +94,49 @@ app.delete("/transactions/:id", (req, res) => {
   } else {
     console.log("deletedTransaction", deletedTransaction);
     res.status(404).json({ message: "Resource not found" });
+  }
+});
+
+const allUsers = [
+  { username: "leti", password: "leti1" },
+  { username: "eli", password: "eli1" },
+  { username: "joy", password: "joy1" },
+];
+
+const accessTokenSecret = "trackexaccesstoken";
+const refreshTokenSecret = "refreshtokentrackex";
+const refreshTokens = [];
+
+app.post("/login", (req, res) => {
+  console.log("req.", req.body);
+  const { username, password } = req.body;
+  // const allUsers = db.get("users").value();
+
+  const user = allUsers.find(
+    (user) => user.username === username && user.password === password
+  );
+
+  if (user) {
+    // generate an access token
+    const accessToken = jwt.sign(
+      { username: user.username },
+      accessTokenSecret,
+      { expiresIn: "20m" }
+    );
+    const refreshToken = jwt.sign(
+      { username: user.username },
+      refreshTokenSecret
+    );
+    console.log("accessToken", accessToken);
+    console.log("refreshToken", refreshToken);
+    refreshTokens.push(refreshToken);
+
+    res.status(200).json({
+      accessToken,
+      refreshToken,
+    });
+  } else {
+    res.status(401).json("Username or password incorrect");
   }
 });
 app.listen(3001, () => console.log("Server listening on port 3001! "));
