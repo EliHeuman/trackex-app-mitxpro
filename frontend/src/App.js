@@ -1,12 +1,10 @@
-import React, { useState } from "react";
-
+import React, { useContext } from "react";
 import "./App.css";
 
-import { NavBar } from "./components/NavBar";
-import { TransactionsList } from "./components/Transactions/List";
-import { Login } from "./components/Auth/Login";
 import { MuiThemeProvider, createTheme } from "@material-ui/core/styles";
-import { TrackexProvider } from "./trackexContext";
+import { TrackexProvider } from "./contexts/trackexContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { AppRoutes } from "./components/AppRoutes";
 
 const theme = createTheme({
   palette: {
@@ -64,21 +62,14 @@ const theme = createTheme({
 });
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(undefined);
-
   return (
-    <TrackexProvider>
-      <MuiThemeProvider theme={theme}>
-        {currentUser ? (
-          <div className='layout'>
-            <NavBar />
-            <TransactionsList />
-          </div>
-        ) : (
-          <Login setCurrentUser={setCurrentUser} />
-        )}
-      </MuiThemeProvider>
-    </TrackexProvider>
+    <AuthProvider>
+      <TrackexProvider>
+        <MuiThemeProvider theme={theme}>
+          <AppRoutes />
+        </MuiThemeProvider>
+      </TrackexProvider>
+    </AuthProvider>
   );
 }
 

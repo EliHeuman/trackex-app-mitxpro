@@ -24,7 +24,7 @@ import Skeleton from "@material-ui/lab/Skeleton";
 import { TransactionDrawer } from "../../Drawer";
 import { transactionsAPI } from "../../../services/transactions";
 
-import { TrackexContext } from "../../../trackexContext";
+import { TrackexContext } from "../../../contexts/trackexContext";
 
 const Table = styled.table`
   width: 80%;
@@ -110,7 +110,7 @@ const TransactionsList = () => {
   const [categories, setCategories] = useState({});
   const [types, setTypes] = useState({});
 
-  // console.log("types LIST", types);
+  console.log("types LIST", types);
   // console.log("categories LIST", categories);
 
   useEffect(() => {

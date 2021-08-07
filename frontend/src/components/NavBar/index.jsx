@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import styled, { css } from "styled-components";
+import { NavLink, useHistory } from "react-router-dom";
+import { app } from "../../contexts/AuthContext/firebaseConfig";
 
 import logo from "./logo.svg";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const Logo = styled.img`
   padding: 32px;
@@ -21,24 +24,54 @@ const List = styled.ul`
 
 const Item = styled.li`
   padding: 8px 16px;
-  margin-bottom: 8px;
-  ${(props) =>
-    props.active &&
-    css`
-      background: #ff7661;
-      font-weight: bold;
-    `};
+
+  a {
+    display: block;
+    text-decoration: none;
+    color: white;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    ${(props) =>
+      props.active &&
+      css`
+        background: #ff7661;
+        font-weight: bold;
+      `};
+  }
 `;
 
-const NavBar = (props) => {
+const NavBar = () => {
+  const { user, setUser } = useContext(AuthContext);
+  const history = useHistory();
+
+  const handleLogOut = () => {
+    console.log("logout");
+    app
+      .auth()
+      .signOut()
+      .then((res) => {
+        setUser(null);
+        history.push("/login");
+      })
+      .catch((err) => console.log(err));
+  };
   return (
     <Container>
       <Logo src={logo} alt='sm-logo' />
       <List>
-        <Item>Dashboard</Item>
-        <Item>Calendar</Item>
-        <Item active>Transactions</Item>
-        <Item>Settings</Item>
+        <Item>
+          <NavLink to='/dashboard'>Dashboard </NavLink>
+        </Item>
+        <Item>
+          <NavLink to='/calendar'>Calendar </NavLink>
+        </Item>
+        <Item active>
+          <NavLink to='/transactions'>Transactions </NavLink>
+        </Item>
+        <Item>
+          <NavLink to='/settings'>Settings </NavLink>
+        </Item>
+        <Item onClick={handleLogOut}>Log out</Item>
       </List>
     </Container>
   );

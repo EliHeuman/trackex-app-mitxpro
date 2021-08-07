@@ -25,17 +25,21 @@ const FieldsWrapper = styled.div`
   flex-direction: column;
   gap: 16px;
 `;
-const Login = ({ history }) => {
+const Signup = () => {
   const { user, setUser } = useContext(AuthContext);
+  console.log("Signup");
+  const history = useHistory();
 
   const handleSubmit = async (values) => {
     console.log("values", values);
     try {
-      const authUser = await app
+      const newUser = await app
         .auth()
-        .signInWithEmailAndPassword(values.email, values.password);
-      setUser(authUser);
-      history.push("/transactions");
+        .createUserWithEmailAndPassword(values.email, values.password);
+      if (newUser) {
+        setUser(newUser);
+        history.push("/transactions");
+      }
     } catch (e) {
       console.log(e);
     }
@@ -46,14 +50,9 @@ const Login = ({ history }) => {
     password: Yup.string().required("Required field"),
   });
 
-  if (user) {
-    console.log("Redirect");
-    history.push("/transactions");
-  }
   return (
     <Container>
-      <h1>Login</h1>
-
+      <h1>Signup</h1>
       <Formik
         initialValues={{}}
         validationSchema={userSchema}
@@ -96,7 +95,7 @@ const Login = ({ history }) => {
                 type='submit'
                 disabled={!isValid || isSubmitting}
               >
-                Log in
+                Create Account
               </Button>
             </Form>
             <Debug />
@@ -107,4 +106,4 @@ const Login = ({ history }) => {
   );
 };
 
-export { Login };
+export { Signup };
