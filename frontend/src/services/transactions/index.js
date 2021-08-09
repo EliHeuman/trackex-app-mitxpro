@@ -2,12 +2,12 @@ import axios from "axios";
 
 const baseURL = "http://localhost:3001";
 
-const accessToken = localStorage.getItem("accessToken");
-console.log("access", accessToken);
+const token = localStorage.getItem("token");
+console.log("access", token);
 
 const service = axios.create({
   baseURL: baseURL,
-  headers: { Authorization: `Bearer ${accessToken}` },
+  headers: { Authorization: `Bearer ${token}` },
 });
 
 const transactionsAPI = {

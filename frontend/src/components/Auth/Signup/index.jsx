@@ -36,8 +36,10 @@ const Signup = () => {
       const { status, data } = await authAPI.signup(values);
 
       if (status === 200) {
-        console.log("new user", data);
-        setUser(data);
+        const authUser = await app
+          .auth()
+          .signInWithEmailAndPassword(values.email, values.password);
+        setUser(authUser);
         history.push("/transactions");
       }
     } catch (e) {

@@ -67,8 +67,6 @@ const TransactionDrawer = ({
           onSubmit={(values, { setSubmitting }) => {
             handleSubmit({
               ...values,
-              category: categories.find((cat) => cat.value === values.category),
-              type: types.find((type) => type.value === values.type),
             });
             setSubmitting(false);
           }}

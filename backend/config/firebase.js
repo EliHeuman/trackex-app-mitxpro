@@ -1,11 +1,24 @@
 const firebase = require("firebase/app").default;
 require("firebase/auth");
 
-module.exports = firebase.initializeApp({
-  apiKey: "AIzaSyD3lZsYCPF2bvnoEKSPhsDznJrk9eHnv1Q",
+const app = firebase.initializeApp({
+  apiKey: process.env.FIREBASE_APIKEY,
   authDomain: "trackex-app.firebaseapp.com",
-  projectId: "trackex-app",
+  projectId: process.env.FIREBASE_PROJECTID,
   storageBucket: "trackex-app.appspot.com",
   messagingSenderId: "994479060086",
-  appId: "1:994479060086:web:c07b47a3aee197ff2fdb57",
+  appId: process.env.FIREBASE_APPID,
 });
+
+const admin = require("firebase-admin");
+
+const serviceAccount = require("../serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+module.exports = {
+  app,
+  admin,
+};

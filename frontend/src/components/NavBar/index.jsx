@@ -51,6 +51,7 @@ const NavBar = () => {
       .signOut()
       .then((res) => {
         setUser(null);
+        localStorage.removeItem("token");
         history.push("/login");
       })
       .catch((err) => console.log(err));

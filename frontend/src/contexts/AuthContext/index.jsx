@@ -11,11 +11,15 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     app.auth().onAuthStateChanged((user) => {
-      console.log("user", user);
+      if (user) {
+        user.getIdToken().then((token) => {
+          localStorage.setItem("token", token);
+        });
+      }
       setUser(user);
       setIsLoading(false);
     });
-  }, []);
+  }, [user]);
 
   if (isLoading) {
     return <CircularProgress />;

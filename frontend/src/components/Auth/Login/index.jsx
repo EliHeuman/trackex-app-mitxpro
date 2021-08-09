@@ -26,6 +26,7 @@ const FieldsWrapper = styled.div`
   gap: 16px;
 `;
 const Login = ({ history }) => {
+  console.log("Login");
   const { user, setUser } = useContext(AuthContext);
 
   const handleSubmit = async (values) => {
