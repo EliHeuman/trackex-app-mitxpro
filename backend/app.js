@@ -1,47 +1,29 @@
 const express = require("express");
-const app = express();
-const low = require("lowdb");
 const cors = require("cors");
-const lodashId = require("lodash-id");
-const jwt = require("jsonwebtoken");
-
-const FileSync = require("lowdb/adapters/FileSync");
-
-const adapter = new FileSync("db.json");
-const db = low(adapter);
-
-db._.mixin(lodashId);
-// Set some defaults
-db.defaults({ transactions: [] }).write();
+const mongoose = require("mongoose");
+const firebaseApp = require("./config/firebase");
+const User = require("./models/User");
 
 const corsOptions = {
   origin: "http://localhost:5001",
 };
+
+mongoose
+  .connect("mongodb://localhost:27018/trackex-app", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+  })
+  .then((x) => {
+    console.log(
+      `Connected to Mongo! Database name: "${x.connections[0].name}"`
+    );
+  })
+  .catch((err) => console.log(err));
+const app = express();
 app.use(cors(corsOptions));
 app.use(express.json()); // for parsing application/json
-
-const authenticateJWT = (req, res, next) => {
-  console.log(`Headers: ${JSON.stringify(req.headers)}`);
-  console.log(`Body: ${JSON.stringify(req.body)}`);
-
-  const { authorization } = req.headers;
-
-  if (authorization) {
-    const token = authorization.split(" ")[1];
-
-    jwt.verify(token, accessTokenSecret, (err, user) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
-      console.log("user", user);
-      req.user = user;
-      next();
-    });
-  } else {
-    res.sendStatus(401);
-  }
-};
-app.use(authenticateJWT);
 
 app.get("/transactions", (req, res) => {
   // make sure our server is answering
@@ -97,46 +79,20 @@ app.delete("/transactions/:id", (req, res) => {
   }
 });
 
-const allUsers = [
-  { username: "leti", password: "leti1" },
-  { username: "eli", password: "eli1" },
-  { username: "joy", password: "joy1" },
-];
-
-const accessTokenSecret = "trackexaccesstoken";
-const refreshTokenSecret = "refreshtokentrackex";
-const refreshTokens = [];
-
-app.post("/login", (req, res) => {
-  console.log("req.", req.body);
-  const { username, password } = req.body;
-  // const allUsers = db.get("users").value();
-
-  const user = allUsers.find(
-    (user) => user.username === username && user.password === password
-  );
-
-  if (user) {
-    // generate an access token
-    const accessToken = jwt.sign(
-      { username: user.username },
-      accessTokenSecret,
-      { expiresIn: "20m" }
-    );
-    const refreshToken = jwt.sign(
-      { username: user.username },
-      refreshTokenSecret
-    );
-    console.log("accessToken", accessToken);
-    console.log("refreshToken", refreshToken);
-    refreshTokens.push(refreshToken);
-
-    res.status(200).json({
-      accessToken,
-      refreshToken,
-    });
-  } else {
-    res.status(401).json("Username or password incorrect");
+app.post("/signup", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const firebaseUser = await firebaseApp
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
+    const dbUser = await User.create({ email, firebaseId: firebaseUser.uid });
+    if (dbUser) {
+      res.status(200).json(firebaseUser);
+    } else {
+      res.status(404).json(dbUser);
+    }
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 app.listen(3001, () => console.log("Server listening on port 3001! "));

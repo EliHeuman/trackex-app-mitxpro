@@ -13,9 +13,11 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "firebase": "^8.9.0",
     "jsonwebtoken": "^8.5.1",
     "lodash-id": "^0.14.1",
     "lowdb": "1.0.0",
+    "mongoose": "^5.13.5",
     "nodemon": "^2.0.11"
   }
 }

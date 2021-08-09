@@ -6,7 +6,7 @@ import * as Yup from "yup";
 import { Formik, Form } from "formik";
 import { Debug } from "../../../aux/Debug";
 import { AuthContext } from "../../../contexts/AuthContext";
-
+import { authAPI } from "../../../services/auth";
 import { app } from "../../../contexts/AuthContext/firebaseConfig";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -33,11 +33,11 @@ const Signup = () => {
   const handleSubmit = async (values) => {
     console.log("values", values);
     try {
-      const newUser = await app
-        .auth()
-        .createUserWithEmailAndPassword(values.email, values.password);
-      if (newUser) {
-        setUser(newUser);
+      const { status, data } = await authAPI.signup(values);
+
+      if (status === 200) {
+        console.log("new user", data);
+        setUser(data);
         history.push("/transactions");
       }
     } catch (e) {

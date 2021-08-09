@@ -1,7 +1,7 @@
-import firebase from "firebase/app";
-import "firebase/auth";
+const firebase = require("firebase/app").default;
+require("firebase/auth");
 
-export const app = firebase.initializeApp({
+module.exports = firebase.initializeApp({
   apiKey: "AIzaSyD3lZsYCPF2bvnoEKSPhsDznJrk9eHnv1Q",
   authDomain: "trackex-app.firebaseapp.com",
   projectId: "trackex-app",
